@@ -43,8 +43,8 @@ void setup() {
 
  // state led
   pinMode(STATE_PIN,OUTPUT);
-  // sensor input: LOW=close; HIGH=open
-  pinMode(SENSOR_INPUT,INPUT);
+  // sensor pull-up input: LOW=close; HIGH=open
+  pinMode(SENSOR_INPUT,INPUT_PULLUP);
   
 }
 
@@ -54,6 +54,8 @@ void loop() {
   int newStatus = getStatus(newRead);
   // if is undefined re-read
   if(newStatus==UNDEFINED_STATUS){
+    DebugSerial.print(F("undefined status for input readed: "));
+    DebugSerial.println(newRead);
     lastRead = newRead;
     return;
   }
@@ -74,16 +76,9 @@ int getStatus(int status){
   if(status==1){
     return OPEN;
   }
-  // when is open there is unspecified status
-  // is closed only when remains closed for enaugh time
-  if(status==0 && lastRead!=0){
-    firstClosed = millis();
-  }
-  long period = millis()-firstClosed;
-  // it remains closed for CLOSED_PERIOD
-  if(status==0 && period>CLOSED_PERIOD)
+  if(status==0){
     return CLOSED;
-  // wait for certain status
+  }
   return UNDEFINED_STATUS;
 }
 
@@ -92,7 +87,7 @@ void sendPacket(int status) {
   DebugSerial.print("trimite: ");
   DebugSerial.println(status);
   
-
+/*
     // Prepare the Zigbee Transmit Request API packet
     ZBTxRequest txRequest;
     txRequest.setAddress64(0x0000000000000000);
@@ -107,6 +102,6 @@ void sendPacket(int status) {
 
     // And send it
     xbee.send(txRequest);
-    
+ */   
     lastSent=millis();
 }
